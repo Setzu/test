@@ -9,15 +9,24 @@
 
 <div class="row">
     <div class="col-md-4 col-md-offset-4 cadre-form">
-        <form enctype="multipart/form-data" action="/" method="post" class="form-horizontal">
+        <form action="/" method="post" class="form-horizontal">
             <div class="form-group">
-                <input type="hidden" name="MAX_FILE_SIZE" value="1000000" />
-                <label for="userfile">Sélectionnez un fichier texte (.txt) : </label>
-                <input name="userfile" type="file" />
+                <label for="filename">Saisir le nom d'un fichier</label>
+                <input type="text" name="filename" placeholder="example.txt" maxlength="50" required="required"/>
             </div>
             <div class="form-group">
-                <input type="submit" value="Envoyer le fichier" />
+                <input type="submit" value="Créer le fichier"/>
             </div>
         </form>
     </div>
+</div>
+<div class="row">
+    <h3>Fichiers stockés : </h3>
+    <ul>
+        <?php if (isset($this->aFilesList)) { ?>
+            <?php foreach($this->aFilesList as $fileName) { ?>
+                <li><?= $fileName; ?></li>
+            <?php } ?>
+        <?php } ?>
+    </ul>
 </div>

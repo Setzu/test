@@ -9,7 +9,13 @@
 namespace Test\Interfaces;
 
 
-class FileInterface
+interface FileInterface
 {
+
+    public function setInputFileName($inputFileName);
+
+    public function setOutputFileName($outputFileName);
+
+    public function transform($tranformMethod);
 
 }

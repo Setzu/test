@@ -31,13 +31,11 @@
 </header>
 
 <div class="container">
-    <?php if (isset($this->flashMessages) && !empty($this->flashMessages)) { ?>
         <div class="row">
             <div class="col-md-6 col-md-offset-3">
-                <?php echo $this->flashMessages; ?>
+                <?php echo $this->flashMessages(); ?>
             </div>
         </div>
-    <?php } ?>
     <?php include_once ($this->content); ?>
 </div>
 

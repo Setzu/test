@@ -9,151 +9,139 @@
 namespace Test\Service;
 
 
-class File extends AbstractService
+use Test\Interfaces\FileInterface;
+
+class File extends AbstractService implements FileInterface
 {
 
-    public $name;
-    public $type;
-    public $tmpName;
-    public $size;
-    public $uploadDate;
-    public $error;
+    public $inputFileName;
+    public $outputFileName;
+    public $content;
 
     const BASE_PATH = __DIR__ . '/../../../data/files/';
     const TRANSFORM_PATH = __DIR__ . '/../../../data/files/transform/';
 
     /**
      * Files constructor.
+     * @param string $sFileName
+     * @param string $sFileContent
      * @throws \Exception
      */
-    public function __construct($aFileDatas = [])
+    public function __construct($sFileName, $sFileContent)
     {
-        if (is_array($aFileDatas) && count($aFileDatas) > 0) {
-            $this->hydrate($this, $aFileDatas);
-            $this->addFile($this);
+        if (!is_string($sFileName) || empty($sFileName)) {
+            throw new \Exception('Invalid file name.');
+        }
+
+        $this->setInputFileName($sFileName);
+        $this->setContent($sFileContent);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function addFile($tranformed = false)
+    {
+        if ($tranformed) {
+            return fputs(fopen(self::BASE_PATH . $this->getOutputFileName(), 'a+'), $this->getContent());
+        } else {
+            return fputs(fopen(self::BASE_PATH . $this->getInputFileName(), 'a+'), $this->getContent());
         }
     }
 
     /**
-     * @param File $file
+     * First transform method
+     * @throws \Exception
      */
-    public function addFile(File $file)
+    public function addDigits()
     {
-        if (!file_exists(self::BASE_PATH)) {
-            mkdir(self::BASE_PATH, 0777, true);
+        $aFileContent = preg_split('/\n|\r\n?/', $this->getContent());
+        $sNewContent = '';
+
+        foreach ($aFileContent as $line) {
+            $sNewContent .= rand(10000, 99999) . ' : ' . $line . "\r\n";
         }
 
-        $pathFile = self::BASE_PATH . $this->getName();
+        $this->setContent($sNewContent);
 
-        if (!file_exists($pathFile)) {
-            move_uploaded_file($file->getTmpName(), $pathFile);
+        return $this->addFile(true);
+    }
+
+
+    /**
+     * Second transform method
+     * @throws \Exception
+     */
+    public function shuffle()
+    {
+        $aFileContent = preg_split('/\n|\r\n?/', $this->getContent());
+        $sNewContent = '';
+
+        foreach ($aFileContent as $line) {
+            $sNewContent .= str_shuffle($line) . "\r\n";
         }
+
+        $this->setContent($sNewContent);
+
+        return $this->addFile(true);
     }
 
-    public function transform(File $file)
+    public function transform($tranformMethod)
     {
-        if (!file_exists(self::BASE_PATH)) {
-            mkdir(self::BASE_PATH, 0777, true);
-        } elseif(!file_exists(self::TRANSFORM_PATH)) {
-            mkdir(self::TRANSFORM_PATH, 0777, true);
+        if (!method_exists($this, $tranformMethod)) {
+            throw new \Exception('The method ' . $tranformMethod . ' does not exists');
         }
 
+        $this->setOutputFileName('transformed_with_' . $tranformMethod . '_' . $this->getInputFileName());
 
+        return $this->$tranformMethod();
     }
 
     /**
      * @return mixed
      */
-    public function getName()
+    public function getContent()
     {
-        return $this->name;
+        return $this->content;
     }
 
     /**
-     * @param mixed $name
+     * @param mixed $content
      */
-    public function setName($name)
+    public function setContent($content)
     {
-        $this->name = $name;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getType()
-    {
-        return $this->type;
-    }
-
-    /**
-     * @param mixed $type
-     */
-    public function setType($type)
-    {
-        $this->type = $type;
+        $this->content = $content;
     }
 
     /**
      * @return mixed
      */
-    public function getUploadDate()
+    public function getInputFileName()
     {
-        return $this->uploadDate;
+        return $this->inputFileName;
     }
 
     /**
-     * @param mixed $uploadDate
+     * @param mixed $inputFileName
      */
-    public function setUploadDate($uploadDate)
+    public function setInputFileName($inputFileName)
     {
-        $this->uploadDate = $uploadDate;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getSize()
-    {
-        return $this->size;
-    }
-
-    /**
-     * @param mixed $size
-     */
-    public function setSize($size)
-    {
-        $this->size = $size;
+        $this->inputFileName = $inputFileName;
     }
 
     /**
      * @return mixed
      */
-    public function getTmpName()
+    public function getOutputFileName()
     {
-        return $this->tmpName;
+        return $this->outputFileName;
     }
 
     /**
-     * @param mixed $tmpName
+     * @param mixed $outputFileName
      */
-    public function setTmpName($tmpName)
+    public function setOutputFileName($outputFileName)
     {
-        $this->tmpName = $tmpName;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getError()
-    {
-        return $this->error;
-    }
-
-    /**
-     * @param mixed $error
-     */
-    public function setError($error)
-    {
-        $this->error = $error;
+        $this->outputFileName = $outputFileName;
     }
 }
